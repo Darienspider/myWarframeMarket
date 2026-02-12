@@ -1,1 +1,6 @@
 streamlit
+matplotlib
+bs4
+pandas
+numpy
+Pillow
