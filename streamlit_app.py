@@ -60,20 +60,28 @@ def generateMarketContainer(item_name):
         if extraction:
             #################### SELL ORDERS ####################
             df = pd.DataFrame(api.sell_orders)
+            df["status"] = df["user"].apply(lambda u: u["status"])
             df = df[df['createdAt'] >= str(time_stopper)] #cuttoff to only show details of previous year forward
             # Convert 'createdAt' to datetime
             df['createdAt'] = pd.to_datetime(df['createdAt'])
-
             # Sort by date
             df = df.sort_values('createdAt')
 
+            df["messageContent"] = df.apply(
+                lambda r: f"w/ {r['user']['ingameName']} Hi! I want to buy: "
+                        f"[{str(item_name).replace(' blueprint','')}] "
+                        f"for {r['platinum']} platinum (warframe.market)",
+                axis=1
+            )
+            
+            selling_df = df.drop(columns=['quantity','perTrade','visible','itemId','user','id'])
 
             sell_recurring_price = str(df['platinum'].mode()[0])
             
             st.header(f"Sell Orders for {item_name}")
             st.write('The most recurring price is: ',sell_recurring_price,' plat')
-            # df = df.drop(columns=['quantity','perTrade','visible','itemId','user'])
-            st.dataframe(df)
+
+            st.dataframe(selling_df)
 
             # GRID DESIGN
             st.title(f'Year to Date graph for {item_name}')
@@ -85,16 +93,25 @@ def generateMarketContainer(item_name):
             #################### BUY ORDERS ####################
    
             buying_df = pd.DataFrame(api.buy_orders)
+            buying_df["status"] = buying_df["user"].apply(lambda u: u["status"])
+
             buying_df = buying_df[buying_df['createdAt'] >= str(time_stopper)] #cuttoff to only show details of previous year forward
             # Convert 'createdAt' to datetime
             buying_df['createdAt'] = pd.to_datetime(buying_df['createdAt'])
+            buying_df["messageContent"] = buying_df.apply(
+                lambda r: f"w/ {r['user']['ingameName']} Hi! I want to sell: "
+                        f"[{str(item_name).replace(' blueprint','')}] "
+                        f"for {r['platinum']} platinum (warframe.market)",
+                axis=1
+            )
+            
 
             # Sort by date
             buying_df = buying_df.sort_values('createdAt')
 
             st.header(f"Buy Orders for {item_name}")
             st.write('The most recurring price is: ',str(buying_df['platinum'].mode()[0]),' plat')
-            buying_df = buying_df.drop(columns=['quantity','perTrade','visible','itemId','user'])
+            buying_df = buying_df.drop(columns=['quantity','perTrade','visible','itemId','user','id'])
             
             st.dataframe(buying_df)
 

@@ -18,7 +18,7 @@ class WarframeMarket():
         
         item_name = str(item_name).replace(' ','_')
         print(item_name)
-        site = rq.get(f'{self.link}/orders/item/{item_name}')
+        site = rq.get((f'{self.link}/orders/item/{item_name}').lower())
         self.all_orders = json.loads(site.content)
         return self.all_orders
 
@@ -27,7 +27,6 @@ class WarframeMarket():
             item_name = item_name.strip() +' blueprint' #this fixes the need to add blueprint everytime  
         
         payload = self.item_orders(f'{item_name}')['data']
-
         # print(payload)
         self.buy_orders = []
         self.sell_orders = []
